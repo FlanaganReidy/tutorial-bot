@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const token = require('./token.js');
+const {token, prefix} = require('./config.json');
 
 
 const bot = new Discord.Client();
@@ -10,8 +10,6 @@ bot.on('ready', () => {
 
 bot.login(token)
 
-
-const prefix = '!'
 
 bot.on('message', async (msg) => {
   //if our message doesnt start with our defined prefix, dont go any further into function
@@ -33,6 +31,11 @@ bot.on('message', async (msg) => {
   if(command === 'ego') {
     msg.react("😀")
     msg.reply('wow, what a great post')
+  }
+
+  if(command === 'spicy'&& args[0] === 'take'){
+      msg.react("🔥")
+      msg.channel.send("That's so brave.")
   }
 
   /* if (command === "clear") {
