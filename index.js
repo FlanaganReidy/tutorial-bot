@@ -67,6 +67,8 @@ bot.on('message', async (msg) => {
     if (args[0]) {
       //add 1 to delete clear command itself
       num = parseInt(args[0]) + 1;
+    }else {
+        args.push(num);
     }
     //bulk delete the messages
     msg.channel.bulkDelete(num);
