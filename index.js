@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const {token, prefix} = require('./config.json');
+const fetch = require('node-fetch');
 
 
 const bot = new Discord.Client();
@@ -38,7 +39,27 @@ bot.on('message', async (msg) => {
       msg.channel.send("That's so brave.")
   }
 
-  /* if (command === "clear") {
+  if(command === 'joke') {
+    //async API call using async/await syntax
+    let getJoke = async () => {
+      //make API call
+      let result = await fetch('https://official-joke-api.appspot.com/random_joke')
+      //convert to object we can work with
+      let json = await result.json()
+      return json
+    }
+    //call function defined above
+    let joke = await getJoke()
+    
+    //have our bot reply using the data returned from our API call
+    msg.reply(`
+    Here's your joke
+    ${joke.setup}
+    ${joke.punchline}
+    `)
+  }
+
+   if (command === "clear") {
     //default deletes message itself plus previous
     let num = 2;
     
@@ -52,5 +73,29 @@ bot.on('message', async (msg) => {
     //notify channel of deleted messages
     msg.channel.send(`deleted  ${args[0]} posts for you`);
   }
-  */
+  
+})
+
+  //set is outside our event listener to prevent wasted processing re-creating it on every message
+let set = new Set(['tranny', 'faggot'])
+bot.on('message', (msg) => {
+//if author of message is a bot, return. This prevents potential infinite loops
+if(msg.author.bot) {
+    return
+}
+//split message into array of individual words
+let message = msg.content.toLowerCase();
+let wordArray = message.split(' ');
+console.log(wordArray)
+    
+//loop through every word and check if it is in our set of banned words
+    for (var i = 0; i < wordArray.length; i++) {
+        //if the message contains a word in our set, we delete it and send a message telling them why
+        if (set.has(wordArray[i])) {
+            msg.delete()
+            msg.channel.send(`sorry ${msg.author.username}, this is a nice person server, no hatespeech allowed`)
+            break
+        }
+
+    }
 })
