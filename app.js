@@ -1,7 +1,16 @@
 const Discord = require("discord.js");
 const {token, prefix} = require('./config.json');
 const fetch = require('node-fetch');
+const Sequelize = require('sequelize');
+const recipe_book = require('schema.js');
 
+const sequelize = new Sequelize('database', 'user', 'password', {
+	host: 'localhost',
+	dialect: 'sqlite',
+	logging: false,
+	// SQLite only
+	storage: 'database.sqlite',
+});
 
 const bot = new Discord.Client();
 
@@ -18,20 +27,23 @@ bot.on('message', async (msg) => {
     console.log('no prefix')
     return
   }
-  
-  //slices off prefix from our message, then trims extra whitespace, then returns our array of words from the message
-  const args = msg.content.slice(prefix.length).trim().split(' ')
-  
-  //splits off the first word from the array, which will be our command
-  const command = args.shift().toLowerCase()
+    const args = msg.content.slice(prefix.length).trim().split(' ')
+    const command = args.shift().toLowerCase()
   //log the command
   console.log('command: ', command)
   //log any arguments passed with a command
   console.log(args)
 
+
+
+  //series of entertaining response commands.
   if(command === 'ego') {
     msg.react("😀")
-    msg.reply('wow, what a great post')
+    msg.reply('Wow! You\'re both smart and incredibly attractive!')
+  }
+
+  if(command == 'status'){
+    msg.channel.send("Jeeze, tough question. I'm really just trying my best.")
   }
 
   if(command === 'spicy'&& args[0] === 'take'){
@@ -39,6 +51,8 @@ bot.on('message', async (msg) => {
       msg.channel.send("That's so brave.")
   }
 
+
+  //Jump command
   if(command === 'joke') {
     //async API call using async/await syntax
     let getJoke = async () => {
@@ -59,26 +73,29 @@ bot.on('message', async (msg) => {
     `)
   }
 
+  //delete messages command
+
    if (command === "clear") {
-    //default deletes message itself plus previous
     let num = 2;
-    
-    //if argument is provided, we need to convert it from string to number
     if (args[0]) {
-      //add 1 to delete clear command itself
       num = parseInt(args[0]) + 1;
     }else {
         args.push(num);
     }
-    //bulk delete the messages
     msg.channel.bulkDelete(num);
-    //notify channel of deleted messages
     msg.channel.send(`deleted  ${args[0]} posts for you`);
   }
   
 })
 
-  //set is outside our event listener to prevent wasted processing re-creating it on every message
+
+
+
+
+
+
+
+//hate speech filter. Words are hardcoded in. Potential to move over to 
 let set = new Set(['tranny', 'faggot'])
 bot.on('message', (msg) => {
 //if author of message is a bot, return. This prevents potential infinite loops
