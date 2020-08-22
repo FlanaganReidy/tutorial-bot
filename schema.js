@@ -13,3 +13,6 @@ const recipe_book  = sequelize.define('recipe_book', {
 		allowNull: false,
 	}
 });
+
+module.exports = recipe_book;
+
