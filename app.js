@@ -2,7 +2,9 @@ const Discord = require("discord.js");
 const {token, prefix} = require('./config.json');
 const fetch = require('node-fetch');
 const Sequelize = require('sequelize');
-const recipe_book = require('schema.js');
+
+//const Tags = require('./schema.js');
+
 
 const sequelize = new Sequelize('database', 'user', 'password', {
 	host: 'localhost',
@@ -12,7 +14,25 @@ const sequelize = new Sequelize('database', 'user', 'password', {
 	storage: 'database.sqlite',
 });
 
+const recipe_card  = sequelize.define('recipe', {
+	name: {
+		type: Sequelize.STRING,
+		unique: true,
+	},
+	recipe: Sequelize.TEXT,
+	username: Sequelize.STRING,
+	try_count: {
+		type: Sequelize.INTEGER,
+		defaultValue: 0,
+		allowNull: false,
+	}
+});
+
 const bot = new Discord.Client();
+
+bot.once('ready', () => {
+	recipe_card.sync();
+});
 
 bot.on('ready', () => {
   console.log('bot is ready')
@@ -71,6 +91,45 @@ bot.on('message', async (msg) => {
     ${joke.setup}
     ${joke.punchline}
     `)
+  }
+
+  //database commands
+if (command === 'saverecipe') {
+    const name = args.shift();
+    const recipe = args.join(' ');
+    try {
+      // equivalent to: INSERT INTO tags (name, recipe, username) values (?, ?, ?);
+      const tag = await recipe_card.create({
+        name: name,
+        recipe: recipe,
+        username: msg.author.username,
+      });
+      return msg.reply(`recipe card for ${tag.name} added.`);
+    }
+    catch (e) {
+      if (e.name === 'SequelizeUniqueConstraintError') {
+        return message.reply('That tag already exists.');
+      }
+      return message.reply('Something went wrong with adding a tag.');
+    }
+  } else if (command === 'pullcard') {
+    const tagName = args[0];
+
+  // equivalent to: SELECT * FROM tags WHERE name = 'tagName' LIMIT 1;
+  const tag = await recipe_card.findOne({ where: { name: tagName } });
+  if (tag) {
+	  return msg.channel.send(`Here is the card for ${tagName}: \n` + tag.get('recipe'));
+  }
+    return msg.reply(`Could not find recipe for: ${tagName}`);
+
+  } else if (command === 'edittag') {
+    // [zeta]
+  } else if (command === 'taginfo') {
+    // [theta]
+  } else if (command === 'showtags') {
+    // [lambda]
+  } else if (command === 'removetag') {
+    // [mu]
   }
 
   //delete messages command
